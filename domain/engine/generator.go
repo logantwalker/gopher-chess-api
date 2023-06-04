@@ -246,7 +246,7 @@ func (g *Generator) generateKingMoves(square int8) {
 	for _, delta := range deltaKing {
 		to = square + delta
 		if g.board.legalSquare(to) {
-			move := g.createMove(square, to)
+			move := g.CreateMove(square, to)
 			if move.MovedPiece == Empty {
 				continue
 			}
@@ -264,7 +264,7 @@ func (g *Generator) generateCaptureMovesForOpponentKnight(square int8) {
 
 	if len(threats) >= 0 {
 		for _, threat := range threats {
-			g.addMove(g.createMove(threat, square))
+			g.addMove(g.CreateMove(threat, square))
 		}
 	}
 }
@@ -272,7 +272,7 @@ func (g *Generator) generateCaptureMovesForOpponentKnight(square int8) {
 func (g *Generator) generateGenericMoves(from int8, delta []int8, singleStep bool) {
 	for _, d := range delta {
 		for to := from + d; g.board.legalSquare(to); to += d {
-			move := g.createMove(from, to)
+			move := g.CreateMove(from, to)
 			// we are facing the same color; skip
 			if move.MovedPiece == Empty {
 				break
@@ -292,7 +292,7 @@ func (g *Generator) generateGenericMoves(from int8, delta []int8, singleStep boo
 	}
 }
 
-func (g *Generator) createMove(from, to int8) Move {
+func (g *Generator) CreateMove(from, to int8) Move {
 	move := Move{From: Square(from), To: Square(to)}
 	move.Promoted = Empty
 	move.Content = g.board.data[to]

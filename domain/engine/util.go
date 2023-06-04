@@ -121,7 +121,7 @@ func formatNodesCount(nodes int64) string {
 	return fmt.Sprintf("%.2fM", float64(nodes)/1000000)
 }
 
-func formatBoard(b *Board) string {
+func FormatBoard(b *Board) string {
 	files := "   a  b  c  d  e  f  g  h"
 	str := fmt.Sprintf("%s\n", files)
 

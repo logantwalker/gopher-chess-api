@@ -9,13 +9,13 @@ import (
 
 // Game represents a gochess game
 type Game struct {
-	board *Board
+	Board *Board
 }
 
 // NewGame creates a new gochess game and returns a reference
 func NewGame() *Game {
 	g := new(Game)
-	g.board = NewBoard(defaultFEN)
+	g.Board = NewBoard(defaultFEN)
 
 	return g
 }
@@ -61,17 +61,17 @@ func (g *Game) Run() {
 					// The position command is followed by a FEN string.
 					// Join the rest of the words to form the FEN string.
 					fen := strings.Join(words[2:], " ")
-					g.board = NewBoard(fen)
+					g.Board = NewBoard(fen)
 				} else if words[1] == "startpos" {
 					// The position command is followed by 'startpos', so set the board to the initial position.
-					g.board = NewBoard(defaultFEN)
+					g.Board = NewBoard(defaultFEN)
 		
 					// If there are moves following 'startpos', apply them.
 					if len(words) > 2 && words[2] == "moves" {
-						g.board = NewBoard(defaultFEN)
+						g.Board = NewBoard(defaultFEN)
 						for _, moveStr := range words[3:] {
-							if m, err := createMove(moveStr); err == nil {
-								gen := NewGenerator(g.board)
+							if m, err := CreateMove(moveStr); err == nil {
+								gen := NewGenerator(g.Board)
 								moves := gen.GenerateMoves()
 					
 								found := Move{From: Invalid}
@@ -83,7 +83,7 @@ func (g *Game) Run() {
 									}
 								}
 								if found.From != Invalid {
-									g.board.MakeMove(found)
+									g.Board.MakeMove(found)
 								} else {
 									fmt.Printf("illegal move\n")
 								}
@@ -100,11 +100,11 @@ func (g *Game) Run() {
 		} else if in == "isready" {
 			fmt.Println("readyok")
 		}else if in == "moves" || in == "m" {
-			gen := NewGenerator(g.board)
+			gen := NewGenerator(g.Board)
 			printMoves(gen.GenerateMoves())
 
 		} else if in == "turn"{
-			fmt.Println(g.board.sideToMove)
+			fmt.Println(g.Board.sideToMove)
 		}else if in == "perft" {
 			Perft(position1FEN, position1Table)
 
@@ -113,41 +113,41 @@ func (g *Game) Run() {
 
 		} else if in == "ucinewgame" || in == "n" {
 			g := new(Game)
-			g.board = NewBoard(defaultFEN)
+			g.Board = NewBoard(defaultFEN)
 
 		} else if in == "fen" || in == "f" {
-			fmt.Printf("%s\n", generateFEN(g.board))
+			fmt.Printf("%s\n", generateFEN(g.Board))
 
 		} else if in == "undo" || in == "u" {
-			g.board.UndoMove()
+			g.Board.UndoMove()
 
 		} else if strings.HasPrefix(in, "fen ") {
-			g.board = NewBoard(in[4:])
+			g.Board = NewBoard(in[4:])
 
 		} else if in == "print" || in == "p" {
-			fmt.Printf("%s\n", formatBoard(g.board))
+			fmt.Printf("%s\n", FormatBoard(g.Board))
 
 		} else if in == "search" || in == "s" {
-			Search(g.board)
+			Search(g.Board)
 
 		} else if strings.HasPrefix(in, "go") || in == "g" {
-			move := Search(g.board)
+			move := Search(g.Board)
 			stringMove := SquareMap[move.From] + SquareMap[move.To]
 			fmt.Println("bestmove ", stringMove)
-			g.board.MakeMove(move)
+			g.Board.MakeMove(move)
 
 		} else if in == "eval" || in == "e" {
-			fmt.Printf("Score: %d\n", Evaluate(g.board))
+			fmt.Printf("Score: %d\n", Evaluate(g.Board))
 
 		} else if in == "auto" || in == "a" {
-			for g.board.status == statusNormal {
-				g.board.MakeMove(Search(g.board))
-				fmt.Printf("%s\n", formatBoard(g.board))
+			for g.Board.status == statusNormal {
+				g.Board.MakeMove(Search(g.Board))
+				fmt.Printf("%s\n", FormatBoard(g.Board))
 			}
 
-		} else if m, err := createMove(in); err == nil {
+		} else if m, err := CreateMove(in); err == nil {
 			fmt.Println("making move")
-			gen := NewGenerator(g.board)
+			gen := NewGenerator(g.Board)
 			moves := gen.GenerateMoves()
 
 			found := Move{From: Invalid}
@@ -160,7 +160,7 @@ func (g *Game) Run() {
 			}
 
 			if found.From != Invalid {
-				g.board.MakeMove(found)
+				g.Board.MakeMove(found)
 			} else {
 				fmt.Printf("illegal move\n")
 			}

@@ -48,7 +48,7 @@ func (m Move) String() string {
 	return str
 }
 
-func createMove(str string) (Move, error) {
+func CreateMove(str string) (Move, error) {
 
 	// TODO castling/promotion
 
