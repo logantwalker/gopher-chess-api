@@ -1,7 +1,6 @@
 package uci
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -30,7 +29,7 @@ func Command(c *gin.Context){
 	words := strings.Fields(userCommand.UciString)
 
 	// Check if the position command is correctly followed by 'fen' or 'startpos'
-	if len(words) > 1 {
+	if words[0] == "position" {
 		if words[1] == "fen" {
 			// The position command is followed by a FEN string.
 			// Join the rest of the words to form the FEN string.
@@ -59,7 +58,8 @@ func Command(c *gin.Context){
 						if found.From != engine.Invalid {
 							g.Board.MakeMove(found)
 						} else {
-							fmt.Printf("illegal move\n")
+							c.JSON(http.StatusBadRequest,gin.H{"error":"illegal move"})
+							return
 						}
 			
 					}
@@ -68,11 +68,42 @@ func Command(c *gin.Context){
 
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error":"invalid position command"})
+			return
 		}
-	} else {
+	} else if words[0] == "go"{
+		g.Board = engine.NewBoard(defaultFEN)
+		for _, moveStr := range userCommand.Moves {
+			if m, err := engine.CreateMove(moveStr); err == nil {
+				gen := engine.NewGenerator(g.Board)
+				moves := gen.GenerateMoves()
+	
+				found := engine.Move{From: engine.Invalid}
+	
+				for _, move := range moves {
+					if move.From == m.From && move.To == m.To {
+						found = move
+						break
+					}
+				}
+				if found.From != engine.Invalid {
+					g.Board.MakeMove(found)
+				} else {
+					c.JSON(http.StatusBadRequest,gin.H{"error":"illegal move"})
+				}
+	
+			}
+		}
+		move := engine.Search(g.Board)
+		stringMove := engine.SquareMap[move.From] + engine.SquareMap[move.To]
+		g.Board.MakeMove(move)
+		boardString := engine.FormatBoard(g.Board)
+		c.IndentedJSON(http.StatusOK, gin.H{"board":boardString,"bestmove":stringMove})
+		return
+	}else {
 		c.JSON(http.StatusBadRequest, gin.H{"error":"invalid position command"})
+		return
 	}
 
 	boardString := engine.FormatBoard(g.Board)
-	c.IndentedJSON(http.StatusOK, boardString)
+	c.IndentedJSON(http.StatusOK, gin.H{"board":boardString})
 }
